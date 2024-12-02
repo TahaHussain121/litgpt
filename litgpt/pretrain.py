@@ -1,5 +1,6 @@
 # Copyright Lightning AI. Licensed under the Apache License 2.0, see LICENSE file.
 
+
 import math
 import pprint
 import time
@@ -134,13 +135,25 @@ def setup(
         strategy = FSDPStrategy(auto_wrap_policy={Block}, state_dict_type="full", sharding_strategy="HYBRID_SHARD")
     else:
         strategy = "auto"
+        
+    if not torch.backends.mps.is_available():
+        if not torch.backends.mps.is_built():
+            print("MPS NOT AVAILABLE!!")
+        else:
+            print("mps not available because the mac isnt equipped with it")
+        mps_device = None
+    else:
+        print("mps found!!!!")
+        mps_device = torch.device("mps")
+            
 
     fabric = L.Fabric(
         devices=devices,
         num_nodes=num_nodes,
         strategy=strategy,
         precision=precision,
-        loggers=[logger]
+        loggers=[logger],
+        accelerator="cpu",
     )
 
     if torch.cuda.is_available() and devices > 1:
@@ -205,7 +218,7 @@ def main(
     fabric.print(f"Time to instantiate model: {time.perf_counter() - t0:.02f} seconds.")
     fabric.print(f"Total parameters: {num_parameters(model):,}")
 
-    model = torch.compile(model)
+    #model = torch.compile(model)
     model = fabric.setup(model)
 
     extra_kwargs = {"fused": fabric.device.type == "cuda"}

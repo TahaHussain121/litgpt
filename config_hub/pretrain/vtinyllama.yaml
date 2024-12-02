@@ -1,0 +1,55 @@
+# Model configuration
+model_name: pythia-14m #tiny-llama-1.1b
+
+# Output directory for the pretraining results
+out_dir: out/pretrain/pythia14m
+
+# Precision setting for training (using bfloat16 AMP)
+#precision: bf16-mixed
+#precision: None #16-true
+
+# Resume from the last checkpoint (False to start fresh)
+resume: false
+
+# Dataset selection
+data: TinyStories
+
+# Training settings
+train:
+  save_interval: 500        # Save model every 500 steps
+  log_interval: 10          # Log training progress every 10 steps
+  global_batch_size: 1     # Global batch size
+  micro_batch_size: 1      # Micro-batch size
+  lr_warmup_steps: 1000     # Learning rate warmup steps
+  max_tokens: 100000000     # Limit total tokens used for training
+  max_seq_length: 512       # Max token sequence length
+  min_lr: 1e-5              # Minimum learning rate
+
+# Evaluation settings
+eval:
+  interval: 500             # Evaluate every 500 steps
+  max_iters: 50             # Number of iterations for evaluation
+  initial_validation: true  # Perform validation at the start
+  final_validation: true    # Perform validation at the end
+
+# Optimizer settings
+optimizer:
+  class_path: torch.optim.AdamW
+  init_args:
+    lr: 3e-5                # Learning rate
+    weight_decay: 0.01
+    betas:
+      - 0.9
+      - 0.999
+
+# Device settings
+devices: 1
+
+# Optional tokenizer path, set to None if not needed
+tokenizer_dir: checkpoints/pythia14m #checkpoints/TinyLlama/TinyLlama-1.1B-intermediate-step-1431k-3T
+
+# Logger settings
+logger_name: tensorboard
+
+# Random seed for reproducibility
+seed: 42
